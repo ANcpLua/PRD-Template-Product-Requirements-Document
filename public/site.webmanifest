@@ -1,0 +1,17 @@
+{
+  "name": "PRD Template — Product Requirements Document",
+  "short_name": "PRD Template",
+  "description": "A clean, interactive, accessible Product Requirements Document template.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#faf9fb",
+  "theme_color": "#5b54e6",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
