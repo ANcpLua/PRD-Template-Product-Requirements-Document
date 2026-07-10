@@ -15,6 +15,24 @@ good PRD legible at a glance and gives readers real affordances (navigate,
 export, print) without adding noise. The aesthetic is deliberately calm —
 clean, not flashy.
 
+## Where your work is stored
+
+Everything you type stays in **your browser**. There is no account, no server,
+and nothing is uploaded — the site is a static page on GitHub Pages.
+
+- **Autosave** writes to `localStorage` shortly after you stop typing, at least
+  every five seconds while you keep typing, and immediately when you switch away
+  from or close the tab.
+- **Multiple PRDs.** Each document has its own storage key and appears in the
+  switcher above the form. Starting a new one never touches the last one. A
+  document is named by its _Product / feature_ field.
+- **Nothing syncs.** A different browser, a different device, or clearing your
+  site data means a different (or empty) set of documents. Use **Download .json**
+  to keep a copy or move a document elsewhere, and **Import .json** to bring one
+  back — importing adds a document rather than replacing the open one.
+- If a save ever fails (private browsing, full storage quota) the toolbar says
+  so instead of quietly pretending it worked.
+
 ## Stack
 
 - **Vite 8** + **React 19** + **TypeScript** (ESM)

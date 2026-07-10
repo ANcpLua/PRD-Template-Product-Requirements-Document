@@ -27,7 +27,19 @@ export interface PrdDraft {
   contacts: ContactRow[];
 }
 
-export const STORAGE_KEY = "prd-draft-v1";
+/**
+ * The single key every draft used to share. Read once, migrated into the
+ * document library, then retired. See `lib/library.ts`.
+ */
+export const LEGACY_STORAGE_KEY = "prd-draft-v1";
+
+/** Shown wherever a document has no "Product / feature" yet. */
+export const UNTITLED = "Untitled PRD";
+
+/** A document's display name is simply its product field. */
+export function draftTitle(draft: PrdDraft): string {
+  return draft.meta.product.trim() || UNTITLED;
+}
 
 /** Find the first contacts table in the document to seed default rows. */
 function findContactRows(sections: Section[]): ContactRow[] {
@@ -57,22 +69,25 @@ export function createEmptyDraft(doc: Prd): PrdDraft {
   };
 }
 
-/** Load a persisted draft, falling back to a blank one. */
-export function loadDraft(doc: Prd): PrdDraft {
+/** Fill in anything a stored or imported draft is missing. */
+export function normalizeDraft(parsed: Partial<PrdDraft>, doc: Prd): PrdDraft {
+  const empty = createEmptyDraft(doc);
+  return {
+    version: 1,
+    meta: { ...empty.meta, ...parsed.meta },
+    answers: { ...parsed.answers },
+    contacts:
+      Array.isArray(parsed.contacts) && parsed.contacts.length > 0
+        ? parsed.contacts
+        : empty.contacts,
+  };
+}
+
+/** Parse a stored draft, falling back to a blank one. */
+export function parseDraft(raw: string | null, doc: Prd): PrdDraft {
+  if (!raw) return createEmptyDraft(doc);
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return createEmptyDraft(doc);
-    const parsed = JSON.parse(raw) as Partial<PrdDraft>;
-    const empty = createEmptyDraft(doc);
-    return {
-      version: 1,
-      meta: { ...empty.meta, ...parsed.meta },
-      answers: { ...parsed.answers },
-      contacts:
-        Array.isArray(parsed.contacts) && parsed.contacts.length > 0
-          ? parsed.contacts
-          : empty.contacts,
-    };
+    return normalizeDraft(JSON.parse(raw) as Partial<PrdDraft>, doc);
   } catch {
     return createEmptyDraft(doc);
   }

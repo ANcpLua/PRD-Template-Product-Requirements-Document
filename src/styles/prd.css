@@ -659,6 +659,74 @@ a:hover {
   color: var(--danger-ink);
 }
 
+/* ── Document library switcher ──────────────────────────────────────────── */
+.prd-docbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.55rem 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1.25rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.prd-docbar__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+  flex: 1 1 14rem;
+}
+
+.prd-docbar__label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.prd-docbar__count {
+  margin-right: auto;
+  padding-bottom: 0.65rem;
+  font-size: 0.85rem;
+  color: var(--faint);
+}
+
+.prd-select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+  border-radius: 9px;
+  font: inherit;
+}
+
+.prd-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.prd-storage-note {
+  flex-basis: 100%;
+  margin: 0.35rem 0 0;
+  max-width: 46rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--faint);
+}
+
+@media print {
+  .prd-docbar,
+  .prd-storage-note {
+    display: none;
+  }
+}
+
 /* ── Document details (front-matter) ────────────────────────────────────── */
 .prd-meta {
   margin-bottom: 1rem;

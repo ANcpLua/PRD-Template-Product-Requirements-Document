@@ -7,6 +7,7 @@ import {
 } from "react";
 import { prdStore, type SaveState } from "@/state/prdStore";
 import type { ContactRow, DraftMeta } from "@/lib/draft";
+import type { Library } from "@/lib/library";
 
 /**
  * Mounts the store's lifecycle listeners. The draft itself does not travel
@@ -52,5 +53,17 @@ export function useSaveState(): SaveState {
     prdStore.subscribeSaveState,
     prdStore.getSaveState,
     prdStore.getSaveState
+  );
+}
+
+/**
+ * The document index. Returns the library object itself — a snapshot must be
+ * reference-stable between notifications, so callers derive the sorted list.
+ */
+export function useLibrary(): Library {
+  return useSyncExternalStore(
+    prdStore.subscribeLibrary,
+    prdStore.getLibrary,
+    prdStore.getLibrary
   );
 }

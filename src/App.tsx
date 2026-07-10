@@ -1,6 +1,7 @@
 import { prd } from "@/data/prd";
 import { AnswerField } from "@/components/AnswerField";
 import { DocMeta } from "@/components/DocMeta";
+import { DocSwitcher } from "@/components/DocSwitcher";
 import { Hero } from "@/components/Hero";
 import { ReadingProgress } from "@/components/ReadingProgress";
 import { Reveal } from "@/components/Reveal";
@@ -29,6 +30,7 @@ export default function App() {
         </aside>
 
         <main id="main" className="prd-main">
+          <DocSwitcher />
           <DocMeta />
 
           {prd.sections.map((section) => (

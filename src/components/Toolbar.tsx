@@ -2,7 +2,12 @@ import { useRef, useState } from "react";
 import { prd } from "@/data/prd";
 import { prdStore } from "@/state/prdStore";
 import { useSaveState } from "@/state/prdDraft";
-import { downloadFile, slugify, type PrdDraft } from "@/lib/draft";
+import {
+  downloadFile,
+  normalizeDraft,
+  slugify,
+  type PrdDraft,
+} from "@/lib/draft";
 import { draftToMarkdown } from "@/lib/markdown";
 
 /** Validate that a parsed object looks like a PrdDraft before importing it. */
@@ -20,6 +25,13 @@ const STATUS: Record<string, string> = {
   error: "Couldn’t save to this browser — download a copy",
   idle: "Autosaves to this browser",
 };
+
+/**
+ * Say plainly where the work lives. Drafts never leave the browser, so a
+ * cleared profile or a different device means a different set of documents.
+ */
+const STORAGE_NOTE =
+  "Your PRDs are stored in this browser only — nothing is uploaded. Download .json to keep a copy or move one to another device.";
 
 /** Save / download / import / copy / print / clear toolbar for the document. */
 export function Toolbar() {
@@ -69,18 +81,9 @@ export function Toolbar() {
         const parsed: unknown = JSON.parse(String(reader.result));
         if (!isPrdDraft(parsed)) throw new Error("bad shape");
         setImportError(false);
-        const defaultMeta = {
-          product: "",
-          author: "",
-          date: "",
-          status: "Draft",
-        };
-        prdStore.replaceDraft({
-          version: 1,
-          meta: { ...defaultMeta, ...parsed.meta },
-          answers: parsed.answers ?? {},
-          contacts: parsed.contacts,
-        });
+        // Import as a *new* document. Loading a file used to overwrite whatever
+        // was open, with no warning and no way back.
+        prdStore.createDocument(normalizeDraft(parsed, prd));
       } catch {
         setImportError(true);
         window.setTimeout(() => setImportError(false), 3000);
@@ -142,8 +145,9 @@ export function Toolbar() {
         type="button"
         className="prd-button prd-button--danger"
         onClick={onClear}
+        title="Empty every field in the open document"
       >
-        {confirmClear ? "Click again to clear" : "Clear"}
+        {confirmClear ? "Click again to clear" : "Clear fields"}
       </button>
 
       <span
@@ -153,6 +157,8 @@ export function Toolbar() {
       >
         {STATUS[saveState]}
       </span>
+
+      <p className="prd-storage-note">{STORAGE_NOTE}</p>
 
       <input
         ref={fileInput}
