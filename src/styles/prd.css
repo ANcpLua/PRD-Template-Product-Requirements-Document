@@ -24,9 +24,10 @@
   --accent-strong: #4a43d4;
   --accent-soft: rgba(91, 84, 230, 0.1);
   --accent-2: #0fa896;
-  --tip-bg: #fbf6ea;
-  --tip-border: #efe1c2;
-  --tip-ink: #5e4d27;
+  /* Guidance sits at the same optical weight as --muted body copy (6.2:1), so
+     it reads as a note rather than a warning. The rule is decorative. */
+  --tip-ink: #6f5b33;
+  --tip-rule: #d9a441;
   --shadow: 0 1px 2px rgba(20, 18, 45, 0.04), 0 8px 24px rgba(20, 18, 45, 0.06);
   --shadow-soft: 0 1px 2px rgba(20, 18, 45, 0.03);
   color-scheme: light;
@@ -46,9 +47,8 @@
   --accent-strong: #a8a2ff;
   --accent-soft: rgba(139, 132, 255, 0.14);
   --accent-2: #3dd6c6;
-  --tip-bg: rgba(245, 205, 110, 0.07);
-  --tip-border: rgba(245, 205, 110, 0.22);
-  --tip-ink: #e7d6a6;
+  --tip-ink: #b8ab86;
+  --tip-rule: rgba(245, 205, 110, 0.55);
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.36);
   --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3);
   color-scheme: dark;
@@ -526,40 +526,36 @@ a:hover {
 }
 
 /* ── Tip callout ────────────────────────────────────────────────────────── */
+/*
+ * Marginalia, not an alert. A filled card with a border and an icon gave every
+ * hint more visual weight than the field it was hinting at; a single warm rule
+ * separates guidance from prompt without competing with either.
+ */
 .prd-tip {
-  display: flex;
-  gap: 0.75rem;
-  margin: 1rem 0 1.25rem;
   max-width: 48rem;
-  padding: 0.9rem 1.1rem;
-  background: var(--tip-bg);
-  border: 1px solid var(--tip-border);
-  border-radius: 12px;
+  margin: 0.85rem 0 1.25rem;
+  padding-left: 0.95rem;
+  border-left: 2px solid var(--tip-rule);
   color: var(--tip-ink);
 }
 
-.prd-tip__icon {
-  flex: none;
-  font-size: 1.05rem;
-  line-height: 1.5;
-}
-
-.prd-tip__body p {
+.prd-tip__text {
   margin: 0;
-  font-size: 0.93rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
 
 .prd-tip__links {
   list-style: none;
-  margin: 0.55rem 0 0;
+  margin: 0.4rem 0 0;
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem 1rem;
+  gap: 0.35rem 1rem;
 }
 
 .prd-tip__links a {
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   font-weight: 600;
 }
 
