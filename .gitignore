@@ -23,6 +23,12 @@ yarn-debug.log*
 # typescript
 *.tsbuildinfo
 
+# end-to-end test output
+/playwright-report/
+/test-results/
+/blob-report/
+/playwright/.cache/
+
 # agent scratch / local task state
 /.claude/
 /.playwright-mcp/

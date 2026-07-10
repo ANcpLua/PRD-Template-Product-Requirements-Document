@@ -12,6 +12,9 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,mjs,json,css,md,html}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,json,css,md,html}\"",
     "typecheck": "tsc -b --noEmit"
@@ -24,6 +27,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.61.1",
     "@tailwindcss/vite": "4.3.1",
     "@types/node": "24.13.2",
     "@types/react": "19.2.17",
