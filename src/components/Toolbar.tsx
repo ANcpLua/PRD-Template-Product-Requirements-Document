@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { prd } from "@/data/prd";
-import { usePrdDraft } from "@/state/prdDraft";
+import { prdStore } from "@/state/prdStore";
+import { useSaveState } from "@/state/prdDraft";
 import { downloadFile, slugify, type PrdDraft } from "@/lib/draft";
 import { draftToMarkdown } from "@/lib/markdown";
 
@@ -13,33 +14,44 @@ function isPrdDraft(value: unknown): value is PrdDraft {
   );
 }
 
+const STATUS: Record<string, string> = {
+  saving: "Saving…",
+  saved: "All changes saved",
+  error: "Couldn’t save to this browser — download a copy",
+  idle: "Autosaves to this browser",
+};
+
 /** Save / download / import / copy / print / clear toolbar for the document. */
 export function Toolbar() {
-  const { draft, saveState, saveNow, clear, replaceDraft } = usePrdDraft();
+  // Only the save indicator is reactive; the draft is read on demand at click
+  // time, so typing never re-renders this toolbar.
+  const saveState = useSaveState();
   const [copied, setCopied] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [importError, setImportError] = useState(false);
   const fileInput = useRef<HTMLInputElement | null>(null);
 
-  const baseName = slugify(draft.meta.product);
+  const baseName = () => slugify(prdStore.getDraft().meta.product);
 
   const downloadMarkdown = () =>
     downloadFile(
-      `${baseName}.md`,
-      draftToMarkdown(prd, draft),
+      `${baseName()}.md`,
+      draftToMarkdown(prd, prdStore.getDraft()),
       "text/markdown;charset=utf-8"
     );
 
   const downloadJson = () =>
     downloadFile(
-      `${baseName}.json`,
-      JSON.stringify(draft, null, 2),
+      `${baseName()}.json`,
+      JSON.stringify(prdStore.getDraft(), null, 2),
       "application/json;charset=utf-8"
     );
 
   const copyMarkdown = async () => {
     try {
-      await navigator.clipboard.writeText(draftToMarkdown(prd, draft));
+      await navigator.clipboard.writeText(
+        draftToMarkdown(prd, prdStore.getDraft())
+      );
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -63,7 +75,7 @@ export function Toolbar() {
           date: "",
           status: "Draft",
         };
-        replaceDraft({
+        prdStore.replaceDraft({
           version: 1,
           meta: { ...defaultMeta, ...parsed.meta },
           answers: parsed.answers ?? {},
@@ -83,18 +95,25 @@ export function Toolbar() {
       window.setTimeout(() => setConfirmClear(false), 3000);
       return;
     }
-    clear();
+    prdStore.clear();
     setConfirmClear(false);
   };
+
+  const saveLabel =
+    saveState === "saved"
+      ? "Saved ✓"
+      : saveState === "error"
+        ? "Save failed"
+        : "Save";
 
   return (
     <div className="prd-toolbar" role="toolbar" aria-label="Document actions">
       <button
         type="button"
         className="prd-button prd-button--primary"
-        onClick={saveNow}
+        onClick={prdStore.flush}
       >
-        {saveState === "saved" ? "Saved ✓" : "Save"}
+        {saveLabel}
       </button>
       <button type="button" className="prd-button" onClick={downloadMarkdown}>
         Download .md
@@ -127,12 +146,12 @@ export function Toolbar() {
         {confirmClear ? "Click again to clear" : "Clear"}
       </button>
 
-      <span className="prd-save-state" aria-live="polite">
-        {saveState === "saving"
-          ? "Saving…"
-          : saveState === "saved"
-            ? "All changes saved"
-            : "Autosaves to this browser"}
+      <span
+        className="prd-save-state"
+        data-state={saveState}
+        aria-live="polite"
+      >
+        {STATUS[saveState]}
       </span>
 
       <input

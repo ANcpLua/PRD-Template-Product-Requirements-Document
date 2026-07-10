@@ -14,7 +14,10 @@
   --surface-2: #f4f3f8;
   --ink: #1a1a29;
   --muted: #5c5c72;
-  --faint: #8b8a9e;
+  /* --faint carries body-size text (footer, save state), so it must clear
+     WCAG AA 4.5:1 against --bg, --surface and --surface-2, not just --bg. */
+  --faint: #6b6a7d;
+  --danger-ink: #c62828;
   --border: #e7e5ef;
   --border-strong: #d8d6e4;
   --accent: #5b54e6;
@@ -35,7 +38,8 @@
   --surface-2: #1c1c2a;
   --ink: #e9e8f1;
   --muted: #a6a4bc;
-  --faint: #74728c;
+  --faint: #8a88a3;
+  --danger-ink: #ff8585;
   --border: #272636;
   --border-strong: #343348;
   --accent: #8b84ff;
@@ -635,6 +639,24 @@ a:hover {
   resize: vertical;
   overflow: hidden;
   line-height: 1.6;
+}
+
+/*
+ * Let the browser grow the textarea. Where this is supported, AnswerField skips
+ * its JS autosize entirely — that path has to read `scrollHeight`, which forces
+ * a synchronous layout of the document on every keystroke.
+ */
+@supports (field-sizing: content) {
+  .prd-textarea {
+    field-sizing: content;
+    /* `field-sizing` ignores the `rows` attribute, so restate the two-row
+       resting height that `rows={2}` gives the JS fallback path. */
+    min-height: 4.375rem;
+  }
+}
+
+.prd-save-state[data-state="error"] {
+  color: var(--danger-ink);
 }
 
 /* ── Document details (front-matter) ────────────────────────────────────── */

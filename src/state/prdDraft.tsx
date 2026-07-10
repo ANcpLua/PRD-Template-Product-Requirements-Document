@@ -1,137 +1,56 @@
 /* eslint-disable react-refresh/only-export-components */
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
-  useMemo,
-  useRef,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { prd } from "@/data/prd";
-import {
-  createEmptyDraft,
-  loadDraft,
-  STORAGE_KEY,
-  type ContactRow,
-  type DraftMeta,
-  type PrdDraft,
-} from "@/lib/draft";
+import { prdStore, type SaveState } from "@/state/prdStore";
+import type { ContactRow, DraftMeta } from "@/lib/draft";
 
-type SaveState = "idle" | "saving" | "saved";
-
-interface PrdDraftApi {
-  draft: PrdDraft;
-  saveState: SaveState;
-  setMeta: (key: keyof DraftMeta, value: string) => void;
-  setAnswer: (id: string, value: string) => void;
-  setContacts: (rows: ContactRow[]) => void;
-  saveNow: () => void;
-  clear: () => void;
-  replaceDraft: (next: PrdDraft) => void;
-}
-
-const PrdDraftContext = createContext<PrdDraftApi | null>(null);
-
+/**
+ * Mounts the store's lifecycle listeners. The draft itself does not travel
+ * through context — each component subscribes to the one slot it renders, so a
+ * keystroke in an answer re-renders that textarea and nothing else.
+ */
 export function PrdDraftProvider({ children }: { children: ReactNode }) {
-  const [draft, setDraft] = useState<PrdDraft>(() => loadDraft(prd));
-  const [saveState, setSaveState] = useState<SaveState>("idle");
-  const savedTimer = useRef<number | undefined>(undefined);
+  useEffect(() => prdStore.startAutoFlush(), []);
+  return <>{children}</>;
+}
 
-  const persist = useCallback((next: PrdDraft) => {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      setSaveState("saved");
-      window.clearTimeout(savedTimer.current);
-      savedTimer.current = window.setTimeout(() => setSaveState("idle"), 1600);
-    } catch {
-      // Storage can be unavailable (private mode / quota); ignore.
-    }
-  }, []);
-
-  // Debounced autosave whenever the draft changes.
-  const isFirstRun = useRef(true);
-  useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
-    setSaveState("saving");
-    const handle = window.setTimeout(() => persist(draft), 600);
-    return () => window.clearTimeout(handle);
-  }, [draft, persist]);
-
-  useEffect(() => () => window.clearTimeout(savedTimer.current), []);
-
-  const setMeta = useCallback((key: keyof DraftMeta, value: string) => {
-    setDraft((current) => ({
-      ...current,
-      meta: { ...current.meta, [key]: value },
-    }));
-  }, []);
-
-  const setAnswer = useCallback((id: string, value: string) => {
-    setDraft((current) => ({
-      ...current,
-      answers: { ...current.answers, [id]: value },
-    }));
-  }, []);
-
-  const setContacts = useCallback((rows: ContactRow[]) => {
-    setDraft((current) => ({ ...current, contacts: rows }));
-  }, []);
-
-  const saveNow = useCallback(() => persist(draft), [draft, persist]);
-
-  const clear = useCallback(() => {
-    const empty = createEmptyDraft(prd);
-    setDraft(empty);
-    persist(empty);
-  }, [persist]);
-
-  const replaceDraft = useCallback(
-    (next: PrdDraft) => {
-      setDraft(next);
-      persist(next);
-    },
-    [persist]
+/** The text of a single answer, keyed by section/subsection id. */
+export function useAnswer(id: string): string {
+  const subscribe = useCallback(
+    (listener: () => void) => prdStore.subscribeAnswer(id)(listener),
+    [id]
   );
+  const get = useCallback(() => prdStore.getAnswer(id), [id]);
+  return useSyncExternalStore(subscribe, get, get);
+}
 
-  const value = useMemo<PrdDraftApi>(
-    () => ({
-      draft,
-      saveState,
-      setMeta,
-      setAnswer,
-      setContacts,
-      saveNow,
-      clear,
-      replaceDraft,
-    }),
-    [
-      draft,
-      saveState,
-      setMeta,
-      setAnswer,
-      setContacts,
-      saveNow,
-      clear,
-      replaceDraft,
-    ]
-  );
-
-  return (
-    <PrdDraftContext.Provider value={value}>
-      {children}
-    </PrdDraftContext.Provider>
+/** The document's editable front-matter. */
+export function useMeta(): DraftMeta {
+  return useSyncExternalStore(
+    prdStore.subscribeMeta,
+    prdStore.getMeta,
+    prdStore.getMeta
   );
 }
 
-export function usePrdDraft(): PrdDraftApi {
-  const ctx = useContext(PrdDraftContext);
-  if (!ctx) {
-    throw new Error("usePrdDraft must be used within a PrdDraftProvider");
-  }
-  return ctx;
+/** The editable contacts rows. */
+export function useContacts(): ContactRow[] {
+  return useSyncExternalStore(
+    prdStore.subscribeContacts,
+    prdStore.getContacts,
+    prdStore.getContacts
+  );
+}
+
+/** Autosave status. Subscribed to by the toolbar indicator only. */
+export function useSaveState(): SaveState {
+  return useSyncExternalStore(
+    prdStore.subscribeSaveState,
+    prdStore.getSaveState,
+    prdStore.getSaveState
+  );
 }

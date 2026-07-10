@@ -1,4 +1,5 @@
-import { usePrdDraft } from "@/state/prdDraft";
+import { prdStore } from "@/state/prdStore";
+import { useMeta } from "@/state/prdDraft";
 import type { DraftMeta } from "@/lib/draft";
 
 const FIELDS: {
@@ -19,7 +20,7 @@ const FIELDS: {
 
 /** Editable front-matter card for the document's identifying details. */
 export function DocMeta() {
-  const { draft, setMeta } = usePrdDraft();
+  const meta = useMeta();
 
   return (
     <section className="prd-meta" aria-label="Document details">
@@ -30,9 +31,11 @@ export function DocMeta() {
             <input
               className="prd-input"
               type={field.type ?? "text"}
-              value={draft.meta[field.key]}
+              value={meta[field.key]}
               placeholder={field.placeholder}
-              onChange={(event) => setMeta(field.key, event.target.value)}
+              onChange={(event) =>
+                prdStore.setMeta(field.key, event.target.value)
+              }
             />
           </label>
         ))}

@@ -1,4 +1,5 @@
-import { usePrdDraft } from "@/state/prdDraft";
+import { prdStore } from "@/state/prdStore";
+import { useContacts } from "@/state/prdDraft";
 import { emptyContactRow, type ContactRow } from "@/lib/draft";
 
 const COLUMNS: { key: keyof ContactRow; label: string; placeholder: string }[] =
@@ -10,19 +11,18 @@ const COLUMNS: { key: keyof ContactRow; label: string; placeholder: string }[] =
 
 /** The contacts table as an editable grid with add/remove-row controls. */
 export function EditableContactsTable() {
-  const { draft, setContacts } = usePrdDraft();
-  const rows = draft.contacts;
+  const rows = useContacts();
 
   const updateCell = (index: number, key: keyof ContactRow, value: string) => {
-    setContacts(
+    prdStore.setContacts(
       rows.map((row, i) => (i === index ? { ...row, [key]: value } : row))
     );
   };
 
-  const addRow = () => setContacts([...rows, emptyContactRow()]);
+  const addRow = () => prdStore.setContacts([...rows, emptyContactRow()]);
 
   const removeRow = (index: number) =>
-    setContacts(rows.filter((_, i) => i !== index));
+    prdStore.setContacts(rows.filter((_, i) => i !== index));
 
   return (
     <div className="prd-table-wrap">
