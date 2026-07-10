@@ -15,6 +15,10 @@
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:report": "playwright show-report",
+    "links": "node scripts/links.mjs list",
+    "links:write": "node scripts/links.mjs write",
+    "links:verify": "node scripts/links.mjs verify",
+    "links:check": "node scripts/links.mjs check",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,mjs,json,css,md,html}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mjs,json,css,md,html}\"",
     "typecheck": "tsc -b --noEmit"

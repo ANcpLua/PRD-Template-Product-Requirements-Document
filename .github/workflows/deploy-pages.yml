@@ -37,6 +37,12 @@ jobs:
       - name: Check formatting
         run: npm run format:check
 
+      # Offline: asserts LINKS.md still matches the data it is generated from.
+      # The network check lives in link-check.yml — a third-party outage must
+      # never block a deploy of this site.
+      - name: Verify LINKS.md is current
+        run: npm run links:verify
+
       # `npm run build` is `tsc -b && vite build`, so this also typechecks.
       - name: Build
         run: npm run build

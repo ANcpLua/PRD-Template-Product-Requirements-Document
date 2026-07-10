@@ -78,6 +78,17 @@ the document library existed, and still rendering when `localStorage` throws.
 CI runs lint, formatting, typecheck + build, then this suite. A failing test
 blocks the Pages deploy.
 
+## External links
+
+[`LINKS.md`](./LINKS.md) lists every URL this project points a reader at, and is
+generated from `src/data/prd.ts` — run `npm run links:write` after editing a
+tip. `npm run links:check` fetches each one and fails on a 404; a weekly
+workflow runs it and opens an issue when something rots, so a dead reference
+surfaces here rather than in front of a reader.
+
+It also tracks which product terms (`Value Curve`, `Opportunity Solution Tree`,
+…) the document uses without giving the reader anything to click.
+
 ## Layout
 
 ```

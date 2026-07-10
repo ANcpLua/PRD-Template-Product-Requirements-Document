@@ -64,6 +64,32 @@ Rules of thumb:
 CI runs lint, format, typecheck+build, then this suite. **A failing test blocks
 the Pages deploy.**
 
+## External links
+
+Every URL the project shows a reader is listed in **`LINKS.md`**, which is
+**generated** from `src/data/prd.ts` and the docs — never hand-edited. A
+hand-kept list drifts the first time someone edits a tip, and a stale link
+registry is worse than none.
+
+| Command                | What it does                                   |
+| ---------------------- | ---------------------------------------------- |
+| `npm run links`        | Print what is referenced, and from where       |
+| `npm run links:write`  | Regenerate `LINKS.md` (after editing `prd.ts`) |
+| `npm run links:verify` | Offline: fail if `LINKS.md` is stale           |
+| `npm run links:check`  | Network: fail on a dead link                   |
+
+- `links:verify` runs in the **deploy** workflow — it is offline and cheap.
+- `links:check` runs **weekly** in `link-check.yml`, never on deploy. Someone
+  else's site going down should open an issue to triage, not block a release of
+  this one. It fails only on a 404/410 or a hostname that does not resolve;
+  hosts that block bots (401/403/405/429) are reported as unverifiable.
+- `LINKS.md` is in `.prettierignore`. Formatting it would reshape the tables and
+  `links:verify` could then never match its own generator.
+- `LINKS.md` also tracks **jargon coverage**: which product terms the document
+  uses (`Value Curve`, `Opportunity Solution Tree`, …) and whether the tip using
+  them offers the reader a reference. Extend `TERMS` in `scripts/links.mjs` when
+  the template starts using a new one.
+
 ## Content is config-driven
 
 `src/data/prd.ts` is the **single source of truth** for the document — sections,

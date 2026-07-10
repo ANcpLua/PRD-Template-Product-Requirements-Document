@@ -1,0 +1,62 @@
+name: Link check
+
+# Deliberately separate from the deploy. Someone else's site going down should
+# surface as an issue to triage, never as a blocked release of this one.
+on:
+  schedule:
+    - cron: "0 7 * * 1" # Mondays, 07:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: link-check
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version: 24
+
+      - name: Check every referenced URL
+        id: check
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run links:check 2>&1 | tee link-report.txt
+
+      - name: Report link rot as an issue
+        if: steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh label create link-rot --color d93f0b --description "A referenced URL is dead" --force
+
+          body=$(printf '%s\n\n```\n%s\n```\n\n[Full run](%s)\n' \
+            "A link the document points readers at is dead. See LINKS.md for where each one is used." \
+            "$(cat link-report.txt)" "$RUN_URL")
+
+          existing=$(gh issue list --label link-rot --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+            echo "commented on existing issue #$existing"
+          else
+            gh issue create --title "Dead external link(s)" --label link-rot --body "$body"
+          fi
+
+      - name: Fail if any link is dead
+        if: steps.check.outcome == 'failure'
+        run: exit 1
